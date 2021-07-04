@@ -23,55 +23,44 @@ function init(){
             .text(sample)
             .property("value",sample);
         });
-        console.log(data);
         var firstsample = sampleNames[0];
         buildMetaData(firstsample)
     });
 }
 
+var otuIdsNames = [];
+var otuIds = [];
+	
 function optionChanged(newsample){
-    buildMetaData(newsample);
-    
-    otuIds.map(name => {
-        otuIdsNames.push(`OTU ${name}`);
-        otuIdsNames.reverse();
-    });
-}
-init();
-
-function builtChart(firstsample){
-    console.log(firstsample)
+	buildMetaData(newsample)
+	getOtuIds(newsample)
+	
+	otuIdsNames = otuIds.reverse()
+    builtChart(newsample)
 }
 
 function getOtuIds(sample){
-	var otuIds;
     d3.json("samples.json").then((data)=>{
-        var metaData = data.metadata; 
-        var myarray = metaData.filter(x => x.id==sample);
-        var myresult = myarray[0];
-        Object.entries(myresult).map(([key,value])=>{
-            mypanel.append("h6").text(`${key}: ${value}`);
-        });
-		
-		Object.entries(myresult).map(([key,value])=>{
-            otuIds.push(value);
-        });
+        var samples = data.samples; 
+        var myarray = samples.filter(x => x.id==sample);
+		otuIds = myarray[0].otu_ids;
     });
-	
-	return otuIds;
 }
-// SET UP ARRAYS TO PLOT
 
-var otuIds = buildMetaData.otu_ids;
+init();
 
+function builtChart(firstsample){
+    d3.json("samples.json").then(data => {
+	    var testSubjectData = data.samples.find(testSubject => testSubject.id == firstsample);
+        var sampleValues = testSubjectData.sample_values;
+        var otuLabels = testSubjectData.otu_labels;
+       
+        var otuIdsNames = [];
+        otuIds.map(name => {
+            otuIdsNames.push(`OTU ${name}`);
+            otuIdsNames.reverse();
+        });
 
-    var otuIdsNames = [];
-
-var sampleValues = testSubjectData.sample_values;
-
-otuLabels = testSubjectData.otu_labels;
-
-// BAR CHART
         var otuIdsNamesSliced = otuIdsNames.slice(0,10).reverse();
         var sampleValuesSliced = sampleValues.slice(0,10).reverse();
 
@@ -81,22 +70,21 @@ otuLabels = testSubjectData.otu_labels;
             x: sampleValuesSliced,
             text: otuLabels,
             orientation : "h"
-          };
+        };
         
         var data = [trace]
 
         var layout = {
-            title: {text: "Top 10 Bacteria Cultures Found",
+            title: {text: "Bacteria Cultures Found",
             font: {size: 20,
                 family: "Arial Black"},
             y : .85
-              },
-            xaxis: { title: "Sample Values", 
-                automargin: true, },
-            yaxis: { title: "OTU ID"},
-            margin: { l: 100, r: 10, t: 100, b: 50 }
-                 
-          };
-          
+        },
         
-        Plotly.newPlot('bar', data, layout);
+        margin: { l: 100, r: 10, t: 100, b: 50 }
+            
+    };
+    
+    Plotly.newPlot('bar', data, layout);
+    }); 
+}
