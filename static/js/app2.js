@@ -24,7 +24,10 @@ function init(){
             .property("value",sample);
         });
         var firstsample = sampleNames[0];
-        buildMetaData(firstsample)
+        buildMetaData(firstsample);
+        getOtuIds(firstsample)
+        otuIdsNames = otuIds.reverse()
+        builtChart(firstsample);
     });
 }
 
@@ -86,5 +89,32 @@ function builtChart(firstsample){
     };
     
     Plotly.newPlot('bar', data, layout);
-    }); 
+    //}); 
+//}
+        var trace1 = {
+            x: otuIds,
+            y: sampleValues,
+            text: otuLabels,
+            mode: 'markers',
+            marker: {
+                color: otuIds,
+                size: sampleValues
+            }
+        };
+        
+        var data = [trace1];
+        
+        var layout = {
+            title: {text: 'Bacteria Cultures per Sample',
+            font: {size: 20,
+                family: "Arial Black"},
+            y : .85
+                },
+            showlegend: false,
+            xaxis: { title: "OTI ID" },
+
+        };
+  
+    Plotly.newPlot('bubble', data, layout);
+    });
 }
